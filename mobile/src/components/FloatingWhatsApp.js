@@ -22,8 +22,8 @@ export default function FloatingWhatsApp({ phoneNumber = '6281234567890' }) {
 
 const styles = StyleSheet.create({
   fab: {
-    position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 100 : 86,
+    position: Platform.OS === 'web' ? 'fixed' : 'absolute',
+    bottom: Platform.OS === 'web' ? 86 : (Platform.OS === 'ios' ? 100 : 86),
     right: 18,
     width: 52,
     height: 52,
@@ -36,6 +36,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 6,
-    zIndex: 999,
+    zIndex: 10000,
   },
 });

@@ -131,10 +131,12 @@
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
         
         <!-- Topbar (Mobile menu button + User info) -->
-        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-6 z-10 relative">
-            <div class="flex items-center gap-4">
-                <!-- Tambah tombol menu mobile nanti jika diperlukan -->
-                <h1 class="font-semibold text-lg text-slate-700">@yield('title')</h1>
+        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-4 sm:px-6 z-10 relative">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-blue-600 flex md:hidden items-center justify-center text-white font-black text-sm shadow">
+                    DB
+                </div>
+                <h1 class="font-semibold text-base sm:text-lg text-slate-700 truncate">@yield('title')</h1>
             </div>
             
             <div class="flex items-center gap-3">
@@ -142,14 +144,14 @@
                     <div class="text-sm font-semibold text-slate-800">{{ Auth::user()->username }}</div>
                     <div class="text-xs text-slate-500 capitalize">{{ Auth::user()->role }}</div>
                 </div>
-                <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
+                <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold shadow-md">
                     {{ strtoupper(substr(Auth::user()->username, 0, 1)) }}
                 </div>
             </div>
         </header>
 
         <!-- Page Content -->
-        <div class="flex-1 overflow-y-auto p-6 page-content">
+        <div class="flex-1 overflow-y-auto p-4 sm:p-6 pb-28 md:pb-6 page-content">
             <!-- Alert Messages -->
             @if (session('status'))
                 <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded shadow-sm">
@@ -165,6 +167,32 @@
 
             @yield('content')
         </div>
+
+        @if(!Auth::user()->isAdmin())
+            <!-- Mobile Bottom Bar khusus Siswa -->
+            <nav class="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 py-2 px-1 flex justify-around items-center shadow-2xl">
+                <a href="{{ route('siswa.dashboard') }}" class="flex flex-col items-center py-1 px-2 {{ request()->routeIs('siswa.dashboard') ? 'text-sky-400 font-bold' : 'text-slate-400' }}">
+                    <i class="ph ph-house text-xl"></i>
+                    <span class="text-[10px] mt-0.5">Home</span>
+                </a>
+                <a href="{{ route('siswa.formulir.create') }}" class="flex flex-col items-center py-1 px-2 {{ request()->routeIs('siswa.formulir.*') ? 'text-sky-400 font-bold' : 'text-slate-400' }}">
+                    <i class="ph ph-article text-xl"></i>
+                    <span class="text-[10px] mt-0.5">Daftar</span>
+                </a>
+                <a href="{{ route('siswa.dokumen.create') }}" class="flex flex-col items-center py-1 px-2 {{ request()->routeIs('siswa.dokumen.*') ? 'text-sky-400 font-bold' : 'text-slate-400' }}">
+                    <i class="ph ph-upload-simple text-xl"></i>
+                    <span class="text-[10px] mt-0.5">Dokumen</span>
+                </a>
+                <a href="{{ route('siswa.seleksi.index') }}" class="flex flex-col items-center py-1 px-2 {{ request()->routeIs('siswa.seleksi.*') ? 'text-sky-400 font-bold' : 'text-slate-400' }}">
+                    <i class="ph ph-exam text-xl"></i>
+                    <span class="text-[10px] mt-0.5">Seleksi</span>
+                </a>
+                <a href="{{ route('siswa.pengumuman.index') }}" class="flex flex-col items-center py-1 px-2 {{ request()->routeIs('siswa.pengumuman.*') ? 'text-sky-400 font-bold' : 'text-slate-400' }}">
+                    <i class="ph ph-megaphone text-xl"></i>
+                    <span class="text-[10px] mt-0.5">Info</span>
+                </a>
+            </nav>
+        @endif
     </main>
 
     <!-- GSAP Animations -->

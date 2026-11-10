@@ -97,7 +97,7 @@
                             <span class="text-green-600 flex items-center gap-1 text-xs font-semibold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
                                 <i class="ph ph-check-circle text-sm"></i> Terupload
                             </span>
-                            <a href="{{ Storage::url($dokumen->akte_kelahiran) }}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors border border-indigo-200">
+                            <a href="{{ asset('storage/' . $dokumen->akte_kelahiran) }}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors border border-indigo-200">
                                 <i class="ph ph-eye text-sm"></i> Lihat Berkas
                             </a>
                         </div>
@@ -120,7 +120,7 @@
                             <span class="text-green-600 flex items-center gap-1 text-xs font-semibold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
                                 <i class="ph ph-check-circle text-sm"></i> Terupload
                             </span>
-                            <a href="{{ Storage::url($dokumen->kartu_keluarga) }}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors border border-indigo-200">
+                            <a href="{{ asset('storage/' . $dokumen->kartu_keluarga) }}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors border border-indigo-200">
                                 <i class="ph ph-eye text-sm"></i> Lihat Berkas
                             </a>
                         </div>
@@ -143,7 +143,7 @@
                             <span class="text-green-600 flex items-center gap-1 text-xs font-semibold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
                                 <i class="ph ph-check-circle text-sm"></i> Terupload
                             </span>
-                            <a href="{{ Storage::url($dokumen->pasfoto) }}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors border border-indigo-200">
+                            <a href="{{ asset('storage/' . $dokumen->pasfoto) }}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors border border-indigo-200">
                                 <i class="ph ph-eye text-sm"></i> Lihat Berkas
                             </a>
                         </div>
@@ -166,7 +166,7 @@
                             <span class="text-green-600 flex items-center gap-1 text-xs font-semibold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
                                 <i class="ph ph-check-circle text-sm"></i> Terupload
                             </span>
-                            <a href="{{ Storage::url($dokumen->ijazah) }}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors border border-indigo-200">
+                            <a href="{{ asset('storage/' . $dokumen->ijazah) }}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors border border-indigo-200">
                                 <i class="ph ph-eye text-sm"></i> Lihat Berkas
                             </a>
                         </div>

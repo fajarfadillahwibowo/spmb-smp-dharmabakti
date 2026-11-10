@@ -16,16 +16,10 @@ class PembayaranController extends Controller
     {
         $calonSiswa = Auth::user()->calonSiswa;
         $pendaftaran = $calonSiswa ? $calonSiswa->pendaftaran : null;
-        $seleksi = $pendaftaran ? $pendaftaran->seleksi : null;
+        $pembayaran = $pendaftaran ? $pendaftaran->pembayaran : null;
+        $pengaturan = \App\Models\PengaturanPembayaran::getPengaturan();
 
-        // Hanya bisa akses jika sudah diterima
-        if (!$seleksi || $seleksi->status_seleksi !== 'diterima') {
-            return redirect()->route('siswa.dashboard')->with('error', 'Fitur pembayaran hanya untuk siswa yang telah diterima.');
-        }
-
-        $pembayaran = $pendaftaran->pembayaran;
-
-        return view('siswa.pembayaran', compact('pendaftaran', 'pembayaran'));
+        return view('siswa.pembayaran', compact('pendaftaran', 'pembayaran', 'pengaturan'));
     }
 
     /**

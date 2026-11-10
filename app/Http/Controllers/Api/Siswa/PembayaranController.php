@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Siswa;
 
 use App\Http\Controllers\Controller;
+use App\Models\PengaturanPembayaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -14,44 +15,28 @@ class PembayaranController extends Controller
 {
     /**
      * Menampilkan informasi pembayaran dan status bukti yang sudah diupload.
+     * Dapat diakses oleh seluruh calon siswa yang terdaftar.
      */
     public function show(Request $request)
     {
         $calonSiswa  = $request->user()->calonSiswa;
         $pendaftaran = $calonSiswa?->pendaftaran;
-
-        if (!$pendaftaran) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Data pendaftaran tidak ditemukan.',
-            ], 404);
-        }
-
-        // Cek apakah siswa sudah diterima (syarat untuk akses halaman pembayaran)
-        $pendaftaran->load(['seleksi.pengumuman', 'pembayaran']);
-        $pengumuman = $pendaftaran->seleksi?->pengumuman;
-
-        if (!$pengumuman || $pengumuman->hasil_pendaftaran !== 'Diterima') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Halaman pembayaran hanya tersedia untuk siswa yang dinyatakan diterima.',
-            ], 403);
-        }
-
-        $pembayaran = $pendaftaran->pembayaran;
+        $pembayaran  = $pendaftaran?->pembayaran;
+        $rek         = PengaturanPembayaran::getPengaturan();
 
         return response()->json([
             'success' => true,
             'data'    => [
-                // Informasi rekening sekolah
+                // Informasi rekening sekolah dinamis yang diatur oleh admin
                 'info_rekening' => [
-                    'nama_bank'     => 'BNI',
-                    'nomor_rekening'=> '1234567890',
-                    'atas_nama'     => 'SMP Dharma Bakti',
-                    'jumlah_biaya'  => 'Rp 1.500.000',
-                    'keterangan'    => 'Biaya Pendaftaran SPMB Tahun Ajaran 2025/2026',
+                    'nama_bank'      => $rek->nama_bank,
+                    'nomor_rekening' => $rek->nomor_rekening,
+                    'atas_nama'      => $rek->atas_nama,
+                    'jumlah_biaya'   => $rek->jumlah_biaya,
+                    'keterangan'     => $rek->keterangan,
                 ],
-                // Status pembayaran yang sudah ada
+                'nomor_pendaftaran' => $pendaftaran?->nomor_pendaftaran,
+                // Status pembayaran yang sudah ada (jika sudah ada pendaftaran)
                 'pembayaran'    => $pembayaran ? [
                     'status_pembayaran' => $pembayaran->status_pembayaran,
                     'tanggal_upload'    => $pembayaran->tanggal_upload?->format('d M Y'),
@@ -77,15 +62,10 @@ class PembayaranController extends Controller
         $pendaftaran = $calonSiswa?->pendaftaran;
 
         if (!$pendaftaran) {
-            return response()->json(['success' => false, 'message' => 'Data pendaftaran tidak ditemukan.'], 404);
-        }
-
-        // Cek apakah siswa diterima
-        $pendaftaran->load(['seleksi.pengumuman']);
-        $pengumuman = $pendaftaran->seleksi?->pengumuman;
-
-        if (!$pengumuman || $pengumuman->hasil_pendaftaran !== 'Diterima') {
-            return response()->json(['success' => false, 'message' => 'Akses ditolak.'], 403);
+            return response()->json([
+                'success' => false,
+                'message' => 'Silakan lengkapi formulir pendaftaran terlebih dahulu sebelum mengunggah bukti pembayaran.',
+            ], 422);
         }
 
         // Ambil atau buat record pembayaran

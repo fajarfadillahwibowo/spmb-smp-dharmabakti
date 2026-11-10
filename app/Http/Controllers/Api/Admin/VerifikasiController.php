@@ -26,7 +26,7 @@ class VerifikasiController extends Controller
             'menunggu_verifikasi',
             'terverifikasi',
             'ditolak',
-        ])->with(['calonSiswa.user', 'dokumen', 'seleksi'])->latest()->paginate(20);
+        ])->with(['calonSiswa.user', 'dokumen', 'seleksi.pengumuman'])->latest()->paginate(50);
 
         $data = $pendaftarans->through(function ($p) {
             $dok = $p->dokumen;
@@ -36,10 +36,25 @@ class VerifikasiController extends Controller
                 'status_pendaftaran' => $p->status_pendaftaran,
                 'catatan_verifikasi' => $p->catatan_verifikasi,
                 'calon_siswa'        => [
-                    'nama_lengkap' => $p->calonSiswa?->nama_lengkap,
-                    'nisn'         => $p->calonSiswa?->nisn,
-                    'asal_sekolah' => $p->asal_sekolah,
-                    'email'        => $p->calonSiswa?->user?->email,
+                    'nama_lengkap'   => $p->calonSiswa?->nama_lengkap,
+                    'nisn'           => $p->calonSiswa?->nisn,
+                    'asal_sekolah'   => $p->asal_sekolah,
+                    'email'          => $p->calonSiswa?->user?->email,
+                    'no_kk'          => $p->calonSiswa?->no_kk,
+                    'nik'            => $p->calonSiswa?->nik,
+                    'tempat_lahir'   => $p->calonSiswa?->tempat_lahir,
+                    'tanggal_lahir'  => $p->calonSiswa?->tanggal_lahir?->format('d-m-Y'),
+                    'jenis_kelamin'  => $p->calonSiswa?->jenis_kelamin,
+                    'agama'          => $p->calonSiswa?->agama,
+                    'alamat'         => $p->calonSiswa?->alamat,
+                    'nama_ayah'      => $p->calonSiswa?->nama_ayah,
+                    'pekerjaan_ayah' => $p->calonSiswa?->pekerjaan_ayah,
+                    'alamat_ayah'    => $p->calonSiswa?->alamat_ayah,
+                    'nama_ibu'       => $p->calonSiswa?->nama_ibu,
+                    'pekerjaan_ibu'  => $p->calonSiswa?->pekerjaan_ibu,
+                    'alamat_ibu'     => $p->calonSiswa?->alamat_ibu,
+                    'no_hp_ortu'     => $p->calonSiswa?->no_hp_ortu,
+                    'ukuran_pakaian' => $p->calonSiswa?->ukuran_pakaian,
                 ],
                 'dokumen'            => $dok ? [
                     'akte_kelahiran' => $dok->akte_kelahiran ? Storage::url($dok->akte_kelahiran) : null,
@@ -53,12 +68,15 @@ class VerifikasiController extends Controller
                     $dok->pasfoto &&
                     $dok->ijazah,
                 'seleksi'            => $p->seleksi ? [
-                    'id_seleksi'      => $p->seleksi->id_seleksi,
-                    'tanggal_seleksi' => $p->seleksi->tanggal_seleksi?->format('Y-m-d'),
-                    'tanggal_format'  => $p->seleksi->tanggal_seleksi?->translatedFormat('d M Y'),
-                    'waktu_seleksi'   => $p->seleksi->waktu_seleksi,
-                    'tempat_seleksi'  => $p->seleksi->tempat_seleksi,
-                    'catatan'         => $p->seleksi->catatan,
+                    'id_seleksi'       => $p->seleksi->id_seleksi,
+                    'tanggal_seleksi'  => $p->seleksi->tanggal_seleksi?->format('Y-m-d'),
+                    'tanggal_format'   => $p->seleksi->tanggal_seleksi?->translatedFormat('d M Y'),
+                    'waktu_seleksi'    => $p->seleksi->waktu_seleksi,
+                    'tempat_seleksi'   => $p->seleksi->tempat_seleksi,
+                    'nilai_seleksi'    => $p->seleksi->nilai_seleksi,
+                    'status_seleksi'   => $p->seleksi->status_seleksi,
+                    'catatan'          => $p->seleksi->catatan,
+                    'hasil_pengumuman' => $p->seleksi->pengumuman?->hasil_pendaftaran,
                 ] : null,
             ];
         });
@@ -78,6 +96,9 @@ class VerifikasiController extends Controller
             'tempat_seleksi'     => 'nullable|string|max:255',
             'catatan_seleksi'    => 'nullable|string|max:500',
             'catatan_verifikasi' => 'required_if:status_pendaftaran,ditolak|nullable|string|max:1000',
+            'nilai_seleksi'      => 'nullable|numeric|min:0|max:100',
+            'status_seleksi'     => 'nullable|in:diterima,tidak_diterima,menunggu',
+            'catatan_kelulusan'  => 'nullable|string|max:500',
         ]);
 
         $pendaftaran = Pendaftaran::with(['calonSiswa.user', 'seleksi'])->findOrFail($id);
@@ -98,18 +119,55 @@ class VerifikasiController extends Controller
             $tempatSeleksi = $request->tempat_seleksi ?: 'Ruang CBT / Lab Komputer SMP Dharma Bakti';
             $catatan       = $request->catatan_seleksi ?: 'Harap hadir 30 menit sebelum jadwal, membawa kartu peserta pendaftaran dan seragam asal.';
 
+            $seleksiData = [
+                'tanggal_seleksi' => $tanggalSeleksi,
+                'waktu_seleksi'   => $waktuSeleksi,
+                'tempat_seleksi'  => $tempatSeleksi,
+                'catatan'         => $catatan,
+            ];
+
+            // Jika admin langsung memberikan nilai & kelulusan
+            if ($request->filled('nilai_seleksi') && $request->filled('status_seleksi') && in_array($request->status_seleksi, ['diterima', 'tidak_diterima'])) {
+                $seleksiData['nilai_seleksi']  = $request->nilai_seleksi;
+                $seleksiData['status_seleksi'] = $request->status_seleksi;
+                if ($request->filled('catatan_kelulusan')) {
+                    $seleksiData['catatan'] = $request->catatan_kelulusan;
+                }
+            } else {
+                $seleksiData['status_seleksi'] = 'menunggu';
+            }
+
             $seleksi = $pendaftaran->seleksi()->updateOrCreate(
                 ['id_pendaftaran' => $pendaftaran->id_pendaftaran],
-                [
-                    'status_seleksi'  => 'menunggu',
-                    'tanggal_seleksi' => $tanggalSeleksi,
-                    'waktu_seleksi'   => $waktuSeleksi,
-                    'tempat_seleksi'  => $tempatSeleksi,
-                    'catatan'         => $catatan,
-                ]
+                $seleksiData
             );
 
-            // 3. Kirim notifikasi email jadwal seleksi ke calon siswa
+            // Jika langsung dinilai dan lulus/tidak lulus, otomatis buat pengumuman kelulusan
+            if ($request->filled('nilai_seleksi') && in_array($request->status_seleksi, ['diterima', 'tidak_diterima'])) {
+                $seleksi->pengumuman()->updateOrCreate(
+                    ['id_seleksi' => $seleksi->id_seleksi],
+                    [
+                        'hasil_pendaftaran'  => $request->status_seleksi === 'diterima' ? 'Diterima' : 'Tidak Diterima',
+                        'tanggal_pengumuman' => now(),
+                    ]
+                );
+            }
+
+            // 3. Kirim notifikasi in-app ke siswa
+            $userId = $pendaftaran->calonSiswa?->id_user;
+            if ($userId) {
+                $isGraded = $request->filled('nilai_seleksi') && in_array($request->status_seleksi, ['diterima', 'tidak_diterima']);
+                \App\Models\Notifikasi::create([
+                    'user_id' => $userId,
+                    'judul'   => $isGraded ? 'Hasil Kelulusan SPMB Diterbitkan' : 'Berkas Terverifikasi & Jadwal Tes',
+                    'pesan'   => $isGraded
+                        ? "Selamat, nilai seleksi Anda telah dimasukkan ({$request->nilai_seleksi}) dengan status: " . ($request->status_seleksi === 'diterima' ? 'LULUS (Diterima)' : 'Tidak Diterima') . ". Silakan cek di menu Pengumuman."
+                        : "Berkas Anda telah diverifikasi oleh panitia dan dinyatakan VALID. Jadwal tes seleksi telah terbit.",
+                    'tipe'    => $isGraded && $request->status_seleksi === 'diterima' ? 'sukses' : 'info',
+                ]);
+            }
+
+            // 4. Kirim notifikasi email jadwal seleksi ke calon siswa
             $userEmail = $pendaftaran->calonSiswa?->user?->email;
             if ($userEmail) {
                 try {
@@ -121,13 +179,17 @@ class VerifikasiController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Berkas berhasil diverifikasi dan jadwal tes seleksi telah diterbitkan kepada calon siswa.',
+                'message' => $request->filled('nilai_seleksi')
+                    ? 'Berkas berhasil diverifikasi dan nilai kelulusan telah diterbitkan kepada calon siswa.'
+                    : 'Berkas berhasil diverifikasi dan jadwal tes seleksi telah diterbitkan kepada calon siswa.',
                 'data'    => [
                     'status_pendaftaran' => 'terverifikasi',
                     'seleksi'            => [
                         'tanggal_seleksi' => $seleksi->tanggal_seleksi?->format('d M Y'),
                         'waktu_seleksi'   => $seleksi->waktu_seleksi,
                         'tempat_seleksi'  => $seleksi->tempat_seleksi,
+                        'nilai_seleksi'   => $seleksi->nilai_seleksi,
+                        'status_seleksi'  => $seleksi->status_seleksi,
                         'catatan'         => $seleksi->catatan,
                     ],
                 ],
@@ -140,6 +202,17 @@ class VerifikasiController extends Controller
                 'status_pendaftaran' => 'ditolak',
                 'catatan_verifikasi' => $catatanVerifikasi,
             ]);
+
+            // Kirim notifikasi in-app penolakan & catatan revisi
+            $userId = $pendaftaran->calonSiswa?->id_user;
+            if ($userId) {
+                \App\Models\Notifikasi::create([
+                    'user_id' => $userId,
+                    'judul'   => 'Berkas Memerlukan Perbaikan',
+                    'pesan'   => "Panitia memberikan catatan revisi pada berkas Anda: {$catatanVerifikasi}. Silakan perbaiki dan unggah ulang.",
+                    'tipe'    => 'peringatan',
+                ]);
+            }
 
             // Kirim notifikasi email keterangan revisi berkas ke calon siswa
             $userEmail = $pendaftaran->calonSiswa?->user?->email;

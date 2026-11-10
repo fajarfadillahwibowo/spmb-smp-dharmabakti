@@ -49,7 +49,7 @@ class PendaftarController extends Controller
     }
 
     /**
-     * Export data pendaftar ke CSV (bisa dibuka di Excel).
+     * Export data pendaftar ke format Excel/CSV resmi SMP Dharma Bakti T.P 2026-2027.
      */
     public function exportCsv(Request $request)
     {
@@ -59,47 +59,98 @@ class PendaftarController extends Controller
             // Header CSV (Tambahkan BOM agar Excel membaca UTF-8 dengan benar)
             fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
             
+            // Baris 1: Judul
+            fputcsv($handle, ['DATA PESERTA DIDIK BARU TAHUN PELAJARAN 2026-2027', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+            // Baris 2: Baris kosong
+            fputcsv($handle, ['', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+            
+            // Baris 3: Header Kolom Resmi Sesuai Template Sekolah
             fputcsv($handle, [
-                'No. Pendaftaran', 
-                'Nama Lengkap', 
-                'NISN', 
-                'Asal Sekolah', 
-                'Tanggal Daftar', 
-                'Status Berkas',
-                'Status Seleksi',
-                'Status Pembayaran'
+                'NO',
+                'NISN',
+                'NAMA PESERTA DIDIK ',
+                'Jenis Kelamin',
+                'TEMPAT/ TANGGAL LAHIR ',
+                'AGAMA ',
+                'STATUS ',
+                'ALAMAT PESERTA DIDIK ',
+                'NAMA AYAH ',
+                'NAMA IBU ',
+                'NO TELEPON ',
+                'ASAL SEKOLAH ',
+                'NO KK',
+                'NIK'
             ]);
 
-            $query = Pendaftaran::with(['calonSiswa', 'seleksi', 'pembayaran']);
+            $bulanIndo = [
+                1 => 'JANUARI', 2 => 'FEBRUARI', 3 => 'MARET', 4 => 'APRIL',
+                5 => 'MEI', 6 => 'JUNI', 7 => 'JULI', 8 => 'AGUSTUS',
+                9 => 'SEPTEMBER', 10 => 'OKTOBER', 11 => 'NOVEMBER', 12 => 'DESEMBER'
+            ];
+
+            $query = Pendaftaran::with(['calonSiswa'])->orderBy('id_pendaftaran', 'asc');
             
-            // Terapkan filter yang sama jika ada
             if ($request->filled('status')) {
                 $query->where('status_pendaftaran', $request->status);
             }
 
-            // Chunk untuk efisiensi memori
-            $query->chunk(500, function ($pendaftarans) use ($handle) {
-                foreach ($pendaftarans as $p) {
-                    $statusSeleksi = $p->seleksi ? $p->seleksi->status_seleksi : 'Belum';
-                    $statusPembayaran = $p->pembayaran ? $p->pembayaran->status_pembayaran : 'Belum';
+            $pendaftarans = $query->get();
+            $no = 1;
 
-                    fputcsv($handle, [
-                        $p->nomor_pendaftaran,
-                        $p->calonSiswa->nama_lengkap,
-                        $p->calonSiswa->nisn ?? '-',
-                        $p->asal_sekolah ?? '-',
-                        $p->tanggal_daftar->format('Y-m-d'),
-                        $p->status_pendaftaran,
-                        $statusSeleksi,
-                        $statusPembayaran
-                    ]);
+            foreach ($pendaftarans as $p) {
+                $cs = $p->calonSiswa;
+
+                $ttl = '-';
+                if ($cs?->tempat_lahir || $cs?->tanggal_lahir) {
+                    $tempat = strtoupper(trim($cs->tempat_lahir ?: '-'));
+                    if ($cs->tanggal_lahir) {
+                        $d = \Carbon\Carbon::parse($cs->tanggal_lahir);
+                        $tgl = sprintf('%02d %s %d', $d->day, $bulanIndo[$d->month], $d->year);
+                        $ttl = $tempat . ', ' . $tgl;
+                    } else {
+                        $ttl = $tempat;
+                    }
                 }
-            });
+
+                $jk = ($cs?->jenis_kelamin === 'Perempuan' || $cs?->jenis_kelamin === 'PR') ? 'PR' : 'LK';
+
+                fputcsv($handle, [
+                    $no,
+                    $cs?->nisn ?? '-',
+                    strtoupper($cs?->nama_lengkap ?? '-'),
+                    $jk,
+                    $ttl,
+                    strtoupper($cs?->agama ?? 'ISLAM'),
+                    'KANDUNG',
+                    strtoupper($cs?->alamat ?? '-'),
+                    strtoupper($cs?->nama_ayah ?: '-'),
+                    strtoupper($cs?->nama_ibu ?: '-'),
+                    $cs?->no_hp_ortu ?? '-',
+                    strtoupper($p->asal_sekolah ?? '-'),
+                    $cs?->no_kk ?? '-',
+                    $cs?->nik ?? '-'
+                ]);
+
+                $no++;
+            }
+
+            // Tambahkan baris kosong bernomor sampai nomor 40 (sesuai template buku induk)
+            for ($k = $no; $k <= 40; $k++) {
+                fputcsv($handle, [$k, '', '', '', '', '', '', '', '', '', '', '', '', '']);
+            }
+
+            // Bagian pembagian kelas (sesuai template resmi)
+            fputcsv($handle, ['', '', '', '', '', '', '', '']);
+            fputcsv($handle, ['KELAS VII.A', '', 'NIS', '', '', 'KELAS VII.B', '', 'NIS']);
+            for ($k = 1; $k <= 21; $k++) {
+                fputcsv($handle, [$k, '', '', '', '', $k, '', '']);
+            }
+            fputcsv($handle, ['22', '', '', '', '', '', '', '']);
 
             fclose($handle);
         }, 200, [
             'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="Data_Pendaftar_SPMB.csv"',
+            'Content-Disposition' => 'attachment; filename="DATA_PESERTA_DIDIK_BARU_2026-2027.csv"',
         ]);
 
         return $response;

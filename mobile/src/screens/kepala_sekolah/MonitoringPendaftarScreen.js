@@ -131,6 +131,19 @@ export default function MonitoringPendaftarScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Banner Pintasan Laporan Rekapan Akhir */}
+      <TouchableOpacity
+        style={styles.laporanBannerMini}
+        onPress={() => navigation.navigate('TabKepsekLaporan')}
+        activeOpacity={0.85}
+      >
+        <Ionicons name="document-text" size={17} color="#15803D" />
+        <Text style={styles.laporanBannerMiniText}>
+          Pratinjau & Unduh Laporan Rekapitulasi Akhir (PDF)
+        </Text>
+        <Ionicons name="chevron-forward" size={15} color="#15803D" />
+      </TouchableOpacity>
+
       {/* Search & Filter Bar */}
       <View style={styles.filterSection}>
         <View style={styles.searchBar}>
@@ -236,15 +249,17 @@ export default function MonitoringPendaftarScreen() {
                   </View>
                 </View>
 
-                {/* Data Pribadi */}
-                <Text style={styles.groupTitle}>BIODATA CALON SISWA</Text>
+                {/* Data Peserta Didik (Kolom 1 - 7 & 11) */}
+                <Text style={styles.groupTitle}>1. BIODATA PESERTA DIDIK (KOLOM 1 - 7 & 11)</Text>
                 <View style={styles.infoCard}>
                   <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>NISN</Text>
-                    <Text style={styles.infoValue}>{detailData?.calon_siswa?.nisn || '-'}</Text>
+                    <Text style={styles.infoLabel}>1. Nama Peserta Didik</Text>
+                    <Text style={[styles.infoValue, { fontWeight: '700', color: '#1E3A8A' }]}>
+                      {detailData?.calon_siswa?.nama_lengkap || '-'}
+                    </Text>
                   </View>
                   <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Tempat, Tanggal Lahir</Text>
+                    <Text style={styles.infoLabel}>2. Tempat, Tanggal Lahir</Text>
                     <Text style={styles.infoValue}>
                       {[
                         detailData?.calon_siswa?.tempat_lahir,
@@ -253,25 +268,99 @@ export default function MonitoringPendaftarScreen() {
                     </Text>
                   </View>
                   <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>3. No. Kartu Keluarga (KK)</Text>
+                    <Text style={[styles.infoValue, { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' }]}>
+                      {detailData?.calon_siswa?.no_kk || '-'}
+                    </Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>4. NIK Siswa</Text>
+                    <Text style={[styles.infoValue, { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' }]}>
+                      {detailData?.calon_siswa?.nik || '-'}
+                    </Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>5. NISN</Text>
+                    <Text style={[styles.infoValue, { fontWeight: '700', color: '#1D4ED8', fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' }]}>
+                      {detailData?.calon_siswa?.nisn || '-'}
+                    </Text>
+                  </View>
+                  <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>Jenis Kelamin</Text>
                     <Text style={styles.infoValue}>{detailData?.calon_siswa?.jenis_kelamin || '-'}</Text>
                   </View>
                   <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Nama Orang Tua / Wali</Text>
-                    <Text style={styles.infoValue}>{detailData?.calon_siswa?.nama_ortu_wali || '-'}</Text>
+                    <Text style={styles.infoLabel}>6. Agama</Text>
+                    <Text style={styles.infoValue}>{detailData?.calon_siswa?.agama || '-'}</Text>
                   </View>
                   <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>No. HP Orang Tua</Text>
-                    <Text style={styles.infoValue}>{detailData?.calon_siswa?.no_hp_ortu || '-'}</Text>
-                  </View>
-                  <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Alamat Rumah</Text>
+                    <Text style={styles.infoLabel}>7. Alamat Peserta Didik</Text>
                     <Text style={styles.infoValue}>{detailData?.calon_siswa?.alamat || '-'}</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>11. Ukuran Pakaian Seragam</Text>
+                    <View style={styles.sizeBadgeMini}>
+                      <Text style={styles.sizeBadgeMiniText}>Ukuran {detailData?.calon_siswa?.ukuran_pakaian || 'M'}</Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Data Orang Tua / Wali (Kolom 8 & 10) */}
+                <Text style={styles.groupTitle}>2. DATA ORANG TUA / WALI (KOLOM 8 & 10)</Text>
+                <View style={styles.infoCard}>
+                  {/* Data Ayah */}
+                  <View style={styles.subParentBox}>
+                    <Text style={styles.subParentTitle}>Data Ayah Kandung</Text>
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>Nama Ayah</Text>
+                      <Text style={styles.infoValue}>{detailData?.calon_siswa?.nama_ayah || detailData?.calon_siswa?.nama_ortu_wali || '-'}</Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>Pekerjaan Ayah</Text>
+                      <Text style={styles.infoValue}>{detailData?.calon_siswa?.pekerjaan_ayah || '-'}</Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>Alamat Ayah</Text>
+                      <Text style={styles.infoValue}>{detailData?.calon_siswa?.alamat_ayah || '-'}</Text>
+                    </View>
+                  </View>
+
+                  {/* Data Ibu */}
+                  <View style={[styles.subParentBox, { marginTop: 8 }]}>
+                    <Text style={[styles.subParentTitle, { color: '#BE185D' }]}>Data Ibu Kandung</Text>
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>Nama Ibu</Text>
+                      <Text style={styles.infoValue}>{detailData?.calon_siswa?.nama_ibu || '-'}</Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>Pekerjaan Ibu</Text>
+                      <Text style={styles.infoValue}>{detailData?.calon_siswa?.pekerjaan_ibu || '-'}</Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>Alamat Ibu</Text>
+                      <Text style={styles.infoValue}>{detailData?.calon_siswa?.alamat_ibu || '-'}</Text>
+                    </View>
+                  </View>
+
+                  <View style={[styles.infoRow, { marginTop: 10, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#F1F5F9' }]}>
+                    <Text style={styles.infoLabel}>10. No. HP / WhatsApp Ortu</Text>
+                    <Text style={[styles.infoValue, { fontWeight: '700', color: '#059669' }]}>
+                      {detailData?.calon_siswa?.no_hp_ortu || '-'}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Asal Sekolah (Kolom 9) */}
+                <Text style={styles.groupTitle}>3. ASAL SEKOLAH (KOLOM 9)</Text>
+                <View style={styles.infoCard}>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>9. Asal Sekolah (SD/MI)</Text>
+                    <Text style={[styles.infoValue, { fontWeight: '700' }]}>{detailData?.pendaftaran?.asal_sekolah || '-'}</Text>
                   </View>
                 </View>
 
                 {/* Berkas Persyaratan */}
-                <Text style={styles.groupTitle}>BERKAS PERSYARATAN</Text>
+                <Text style={styles.groupTitle}>4. BERKAS PERSYARATAN (4 BERKAS RESMI)</Text>
                 <View style={styles.infoCard}>
                   {[
                     { label: 'Pasfoto 3x4', url: detailData?.dokumen?.pasfoto },
@@ -616,5 +705,54 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#DC2626',
     fontWeight: '600',
+  },
+  sizeBadgeMini: {
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#10B981',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  sizeBadgeMiniText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#059669',
+  },
+  subParentBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  subParentTitle: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#1D4ED8',
+    marginBottom: 6,
+    paddingBottom: 2,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  laporanBannerMini: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1,
+    borderColor: '#86EFAC',
+    borderRadius: 10,
+    marginHorizontal: 16,
+    marginTop: 10,
+    marginBottom: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 8,
+  },
+  laporanBannerMiniText: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#15803D',
   },
 });

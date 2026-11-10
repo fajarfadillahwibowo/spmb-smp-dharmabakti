@@ -19,13 +19,21 @@
                 </div>
                 
                 <p class="text-sm opacity-80 mb-1">Bank Tujuan</p>
-                <p class="text-xl font-bold mb-4">{{ env('REKENING_BANK', 'Bank Sekolah') }}</p>
+                <p class="text-xl font-bold mb-4">{{ $pengaturan->nama_bank ?? 'BANK BNI' }}</p>
                 
                 <p class="text-sm opacity-80 mb-1">Nomor Rekening</p>
-                <p class="text-2xl font-mono font-bold tracking-widest mb-4">{{ env('REKENING_NOMOR', '0000 0000 0000') }}</p>
+                <p class="text-2xl font-mono font-bold tracking-widest mb-4">{{ $pengaturan->nomor_rekening ?? '1234 5678 9012' }}</p>
                 
-                <p class="text-sm opacity-80 mb-1">Atas Nama</p>
-                <p class="text-lg font-bold">{{ env('REKENING_ATAS_NAMA', 'SMP Dharma Bakti') }}</p>
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-sm opacity-80 mb-1">Atas Nama</p>
+                        <p class="text-lg font-bold">{{ $pengaturan->atas_nama ?? 'SMP Dharma Bakti' }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm opacity-80 mb-1">Total Biaya</p>
+                        <p class="text-lg font-bold text-amber-300">{{ $pengaturan->jumlah_biaya ?? 'Rp 1.500.000' }}</p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -78,6 +86,21 @@
             @if($pembayaran && $pembayaran->catatan_admin)
                 <div class="mt-4 p-3 bg-slate-50 rounded-lg text-sm text-slate-600 border border-slate-100">
                     <strong>Catatan Admin:</strong> {{ $pembayaran->catatan_admin }}
+                </div>
+            @endif
+
+            @if($pembayaran && $pembayaran->bukti_pembayaran)
+                <div class="mt-5 pt-4 border-t border-slate-100">
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                        <i class="ph ph-image text-primary"></i> Pratinjau Foto Bukti Terunggah:
+                    </p>
+                    <div class="relative group rounded-xl overflow-hidden border border-slate-200 bg-slate-900 w-full max-w-sm h-48 shadow-sm">
+                        <img src="{{ Storage::url($pembayaran->bukti_pembayaran) }}" alt="Bukti Pembayaran" class="w-full h-full object-cover">
+                        <a href="{{ Storage::url($pembayaran->bukti_pembayaran) }}" target="_blank" class="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-xs font-semibold gap-1.5 backdrop-blur-[2px]">
+                            <i class="ph ph-arrows-out-simple text-2xl"></i>
+                            Buka Foto Ukuran Penuh
+                        </a>
+                    </div>
                 </div>
             @endif
         </div>

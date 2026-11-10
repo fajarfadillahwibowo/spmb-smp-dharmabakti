@@ -8,8 +8,13 @@ import { View, Text, ActivityIndicator, StyleSheet, Platform, Image } from 'reac
 
 // Top Navbar & FAB Component
 import TopNavbar from '../components/TopNavbar';
-import FloatingWhatsApp from '../components/FloatingWhatsApp';
+import FloatingChatButton from '../components/FloatingChatButton';
 import MagicBottomTabBar from '../components/MagicBottomTabBar';
+
+// Screens Chat
+import ChatSiswaScreen from '../screens/chat/ChatSiswaScreen';
+import AdminChatListScreen from '../screens/chat/AdminChatListScreen';
+import AdminChatDetailScreen from '../screens/chat/AdminChatDetailScreen';
 
 // Screens Auth
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -106,6 +111,7 @@ const getTabScreenOptions = ({ route }) => ({
     else if (route.name === 'TabKepsekOverview') iconName = focused ? 'stats-chart' : 'stats-chart-outline';
     else if (route.name === 'TabKepsekPendaftar') iconName = focused ? 'people' : 'people-outline';
     else if (route.name === 'TabKepsekKeuangan') iconName = focused ? 'cash' : 'cash-outline';
+    else if (route.name === 'TabKepsekLaporan') iconName = focused ? 'document-text' : 'document-text-outline';
 
     return (
       <View style={focused ? styles.activeIconWrap : styles.iconWrap}>
@@ -128,11 +134,11 @@ const getTabScreenOptions = ({ route }) => ({
 // ============================================================
 function SiswaTabNavigator() {
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, position: 'relative' }}>
       <Tab.Navigator
-        initialRouteName="TabDaftar"
+        initialRouteName="TabHome"
         tabBar={(props) => <MagicBottomTabBar {...props} />}
-        sceneContainerStyle={{ paddingBottom: 76 }}
+        sceneContainerStyle={{ paddingBottom: 84 }}
         screenOptions={getTabScreenOptions}
       >
         <Tab.Screen
@@ -166,7 +172,7 @@ function SiswaTabNavigator() {
           options={{ tabBarLabel: 'Bayar' }}
         />
       </Tab.Navigator>
-      <FloatingWhatsApp />
+      <FloatingChatButton />
     </View>
   );
 }
@@ -176,10 +182,10 @@ function SiswaTabNavigator() {
 // ============================================================
 function AdminTabNavigator() {
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, position: 'relative' }}>
       <Tab.Navigator
         tabBar={(props) => <MagicBottomTabBar {...props} />}
-        sceneContainerStyle={{ paddingBottom: 76 }}
+        sceneContainerStyle={{ paddingBottom: 84 }}
         screenOptions={getTabScreenOptions}
       >
         <Tab.Screen
@@ -213,6 +219,7 @@ function AdminTabNavigator() {
           options={{ tabBarLabel: 'Laporan' }}
         />
       </Tab.Navigator>
+      <FloatingChatButton />
     </View>
   );
 }
@@ -242,6 +249,11 @@ function KepalaSekolahTabNavigator() {
           name="TabKepsekKeuangan"
           component={MonitoringKeuanganScreen}
           options={{ tabBarLabel: 'Keuangan' }}
+        />
+        <Tab.Screen
+          name="TabKepsekLaporan"
+          component={LaporanScreen}
+          options={{ tabBarLabel: 'Laporan Rekap' }}
         />
       </Tab.Navigator>
     </View>
@@ -318,6 +330,16 @@ export default function AppNavigator() {
                   component={DetailPendaftarScreen}
                   options={{ title: 'Rincian Pendaftar' }}
                 />
+                <Stack.Screen
+                  name="AdminChatList"
+                  component={AdminChatListScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="AdminChatDetail"
+                  component={AdminChatDetailScreen}
+                  options={{ headerShown: false }}
+                />
               </>
             ) : user?.role === 'kepala_sekolah' ? (
               // ==========================================
@@ -344,6 +366,11 @@ export default function AppNavigator() {
                   name="CetakBukti"
                   component={CetakBuktiScreen}
                   options={{ title: 'Cetak Bukti Penerimaan' }}
+                />
+                <Stack.Screen
+                  name="ChatSiswa"
+                  component={ChatSiswaScreen}
+                  options={{ headerShown: false }}
                 />
               </>
             )}

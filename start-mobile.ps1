@@ -14,14 +14,21 @@ Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
 # --- 1. Deteksi IP laptop saat ini ---
-$ip = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object {
-    $_.IPAddress -notlike "127.*" -and
-    $_.IPAddress -notlike "169.254.*" -and
-    $_.PrefixOrigin -ne "WellKnown"
-} | Select-Object -First 1).IPAddress
+$ip = $null
+try {
+    $ip = (Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue | Where-Object {
+        $_.IPAddress -notlike "127.*" -and
+        $_.IPAddress -notlike "169.254.*" -and
+        $_.PrefixOrigin -ne "WellKnown"
+    } | Select-Object -First 1).IPAddress
+} catch {}
 
 if (-not $ip) {
-    Write-Host "[ERROR] Tidak bisa mendeteksi IP. Pastikan laptop sudah terhubung ke hotspot HP!" -ForegroundColor Red
+    $ip = (ipconfig | Select-String "IPv4 Address" | ForEach-Object { ($_ -split ":")[1].Trim() } | Where-Object { $_ -notlike "127.*" -and $_ -notlike "169.254.*" } | Select-Object -First 1)
+}
+
+if (-not $ip) {
+    Write-Host "[ERROR] Tidak bisa mendeteksi IP. Pastikan laptop sudah terhubung ke WiFi / hotspot HP!" -ForegroundColor Red
     exit 1
 }
 
@@ -45,7 +52,17 @@ Write-Host "  (Pastikan Laravel juga jalan di port 8000)" -ForegroundColor Yello
 Write-Host "========================================" -ForegroundColor Yellow
 Write-Host ""
 
-# --- 4. Cek apakah Expo web sudah jalan ---
+# --- 4. Cek apakah MySQL sudah jalan ---
+$mysqlRunning = netstat -ano | findstr ":3306" | findstr "LISTENING"
+if ($mysqlRunning) {
+    Write-Host "[OK] MySQL sudah berjalan di port 3306" -ForegroundColor Green
+} else {
+    Write-Host "[INFO] Menjalankan MySQL Laragon..." -ForegroundColor Cyan
+    Start-Process "C:\laragon\bin\mysql\mysql-8.0.30-winx64\bin\mysqld.exe" -WindowStyle Hidden
+    Start-Sleep -Seconds 2
+}
+
+# --- 5. Cek apakah Expo web sudah jalan ---
 $expoRunning = netstat -ano | findstr ":8081" | findstr "LISTENING"
 if ($expoRunning) {
     Write-Host "[OK] Expo Web sudah berjalan di port 8081" -ForegroundColor Green
@@ -54,7 +71,7 @@ if ($expoRunning) {
     Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PSScriptRoot\mobile'; npx expo start --web --host lan" -WindowStyle Normal
 }
 
-# --- 5. Cek apakah Laravel sudah jalan ---
+# --- 6. Cek apakah Laravel sudah jalan ---
 $laravelRunning = netstat -ano | findstr ":8000" | findstr "LISTENING"
 if ($laravelRunning) {
     Write-Host "[OK] Laravel sudah berjalan di port 8000" -ForegroundColor Green

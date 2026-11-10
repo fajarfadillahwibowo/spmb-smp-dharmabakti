@@ -17,6 +17,19 @@ class PengumumanController extends Controller
         $seleksi = $pendaftaran ? $pendaftaran->seleksi : null;
         $pengumuman = $seleksi ? $seleksi->pengumuman : null;
 
-        return view('siswa.pengumuman', compact('pendaftaran', 'seleksi', 'pengumuman'));
+        $isLulus = ($pengumuman && $pengumuman->hasil_pendaftaran === 'Diterima') ||
+                   ($seleksi && ($seleksi->status_seleksi === 'diterima' || ($seleksi->nilai_seleksi !== null && $seleksi->status_seleksi !== 'tidak_diterima')));
+
+        if ($isLulus && !$pengumuman && $seleksi) {
+            $pengumuman = $seleksi->pengumuman()->updateOrCreate(
+                ['id_seleksi' => $seleksi->id_seleksi],
+                [
+                    'hasil_pendaftaran'  => 'Diterima',
+                    'tanggal_pengumuman' => now(),
+                ]
+            );
+        }
+
+        return view('siswa.pengumuman', compact('calonSiswa', 'pendaftaran', 'seleksi', 'pengumuman'));
     }
 }

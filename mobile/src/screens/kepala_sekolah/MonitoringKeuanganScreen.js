@@ -10,11 +10,11 @@ import {
   Image,
   Modal,
   Platform,
-  Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
 import apiClient from '../../api/client';
-import { COLORS } from '../../config';
+import { COLORS, formatFileUrl } from '../../config';
 import StatusBadge from '../../components/StatusBadge';
 
 export default function MonitoringKeuanganScreen() {
@@ -22,7 +22,7 @@ export default function MonitoringKeuanganScreen() {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedReceipt, setSelectedReceipt] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
   const [filterStatus, setFilterStatus] = useState('');
 
   const fetchKeuangan = async (status = filterStatus) => {
@@ -52,12 +52,17 @@ export default function MonitoringKeuanganScreen() {
     fetchKeuangan(filterStatus);
   }, [filterStatus]);
 
-  const handleOpenReceipt = (url) => {
+  const handleOpenBrowser = async (url) => {
     if (!url) return;
-    if (Platform.OS === 'web') {
-      window.open(url, '_blank');
-    } else {
-      setSelectedReceipt(url);
+    const fullUrl = formatFileUrl(url);
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      window.open(fullUrl, '_blank');
+      return;
+    }
+    try {
+      await WebBrowser.openBrowserAsync(fullUrl);
+    } catch (e) {
+      console.log('Error opening browser:', e);
     }
   };
 
@@ -91,17 +96,36 @@ export default function MonitoringKeuanganScreen() {
         </View>
       ) : null}
 
-      {/* Tombol Lihat Bukti Transfer */}
-      {item.bukti_url && (
-        <TouchableOpacity
-          style={styles.receiptBtn}
-          onPress={() => handleOpenReceipt(item.bukti_url)}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="image-outline" size={15} color="#1E3A8A" />
-          <Text style={styles.receiptBtnText}>Periksa Foto Bukti Transfer</Text>
-        </TouchableOpacity>
-      )}
+      {/* Pratinjau Foto Bukti Transfer */}
+      {item.bukti_url ? (
+        <View style={styles.receiptSection}>
+          <TouchableOpacity
+            style={styles.receiptThumbWrap}
+            activeOpacity={0.88}
+            onPress={() => setSelectedItem(item)}
+          >
+            <Image
+              source={{ uri: formatFileUrl(item.bukti_url) }}
+              style={styles.receiptThumbImage}
+              resizeMode="cover"
+            />
+            <View style={styles.receiptThumbBadge}>
+              <Ionicons name="scan-outline" size={13} color="#FFFFFF" />
+              <Text style={styles.receiptThumbText}>Ketuk untuk Perbesar</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.receiptBtn}
+            onPress={() => setSelectedItem(item)}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="eye-outline" size={15} color="#1E3A8A" />
+            <Text style={styles.receiptBtnText}>Periksa Foto Bukti Transfer</Text>
+            <Ionicons name="expand-outline" size={14} color="#1E3A8A" style={{ marginLeft: 'auto' }} />
+          </TouchableOpacity>
+        </View>
+      ) : null}
     </View>
   );
 
@@ -177,20 +201,64 @@ export default function MonitoringKeuanganScreen() {
         />
       )}
 
-      {/* Modal Foto Bukti Mobile */}
+      {/* ═══════════════════════════════════════════
+          MODAL LIGHTBOX FOTO BUKTI KEPALA SEKOLAH
+      ═══════════════════════════════════════════ */}
       <Modal
-        visible={!!selectedReceipt}
+        visible={!!selectedItem}
         transparent={true}
         animationType="fade"
-        onRequestClose={() => setSelectedReceipt(null)}
+        onRequestClose={() => setSelectedItem(null)}
       >
-        <View style={styles.imageModalOverlay}>
-          <TouchableOpacity style={styles.imageCloseBtn} onPress={() => setSelectedReceipt(null)}>
-            <Ionicons name="close-circle" size={32} color="#FFFFFF" />
-          </TouchableOpacity>
-          {selectedReceipt && (
-            <Image source={{ uri: selectedReceipt }} style={styles.receiptImage} resizeMode="contain" />
-          )}
+        <View style={styles.previewModalOverlay}>
+          <View style={styles.previewModalContainer}>
+            {/* Header */}
+            <View style={styles.previewModalHeader}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.previewModalTitle}>
+                  {selectedItem?.pendaftaran?.nama_siswa || 'Calon Siswa'}
+                </Text>
+                <Text style={styles.previewModalSub}>
+                  No: {selectedItem?.pendaftaran?.nomor_pendaftaran || '-'} • Upload: {selectedItem?.tanggal_upload || '-'}
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.previewModalCloseBtn}
+                onPress={() => setSelectedItem(null)}
+              >
+                <Ionicons name="close" size={22} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Image Box */}
+            <View style={styles.previewImageContainer}>
+              {selectedItem?.bukti_url && (
+                <Image
+                  source={{ uri: formatFileUrl(selectedItem.bukti_url) }}
+                  style={styles.previewModalImage}
+                  resizeMode="contain"
+                />
+              )}
+            </View>
+
+            {/* Footer */}
+            <View style={styles.previewModalFooter}>
+              <TouchableOpacity
+                style={styles.previewBtnSecondary}
+                onPress={() => setSelectedItem(null)}
+              >
+                <Text style={styles.previewBtnSecondaryText}>Tutup</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.previewBtnPrimary}
+                onPress={() => handleOpenBrowser(selectedItem?.bukti_url)}
+              >
+                <Ionicons name="open-outline" size={15} color="#FFFFFF" style={{ marginRight: 6 }} />
+                <Text style={styles.previewBtnPrimaryText}>Buka Gambar Penuh</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       </Modal>
     </View>
@@ -239,45 +307,45 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   filterSection: {
-    paddingVertical: 10,
-    paddingHorizontal: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#E2E8F0',
   },
   chip: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 20,
     backgroundColor: '#F1F5F9',
-    marginRight: 6,
+    marginRight: 8,
   },
   activeChip: {
     backgroundColor: '#1E3A8A',
   },
   chipText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#64748B',
+    fontSize: 12,
+    color: '#475569',
+    fontWeight: '600',
   },
   activeChipText: {
     color: '#FFFFFF',
   },
   listContent: {
-    padding: 14,
+    padding: 16,
+    paddingBottom: 40,
   },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 14,
-    padding: 14,
-    marginBottom: 10,
+    padding: 16,
+    marginBottom: 12,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    elevation: 2,
-    shadowColor: '#172554',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
+    ...Platform.select({
+      web: { boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
+      default: { elevation: 2 },
+    }),
   },
   cardHeader: {
     flexDirection: 'row',
@@ -286,9 +354,9 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   regNumber: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '800',
-    color: '#64748B',
+    color: '#2563EB',
     letterSpacing: 0.5,
   },
   studentName: {
@@ -300,53 +368,87 @@ const styles = StyleSheet.create({
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    marginTop: 2,
+    gap: 4,
+    marginBottom: 10,
   },
   metaText: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#64748B',
   },
   adminNoteBox: {
     backgroundColor: '#F8FAFC',
-    borderRadius: 8,
-    padding: 8,
-    marginTop: 8,
     borderLeftWidth: 3,
     borderLeftColor: '#3B82F6',
+    padding: 8,
+    borderRadius: 6,
+    marginBottom: 10,
   },
   adminNoteLabel: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#64748B',
+    color: '#475569',
+    textTransform: 'uppercase',
   },
   adminNoteText: {
-    fontSize: 11,
+    fontSize: 12,
     color: '#1E293B',
     marginTop: 2,
+  },
+  receiptSection: {
+    marginTop: 8,
+  },
+  receiptThumbWrap: {
+    width: '100%',
+    height: 140,
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: '#0F172A',
+    position: 'relative',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    marginBottom: 8,
+  },
+  receiptThumbImage: {
+    width: '100%',
+    height: '100%',
+  },
+  receiptThumbBadge: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 20,
+  },
+  receiptThumbText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   receiptBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: '#EFF6FF',
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginTop: 10,
-    gap: 6,
     borderWidth: 1,
     borderColor: '#BFDBFE',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    gap: 6,
   },
   receiptBtnText: {
     fontSize: 12,
-    fontWeight: '700',
     color: '#1E3A8A',
+    fontWeight: '700',
   },
   centerBox: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    justifyContent: 'center',
+    paddingTop: 60,
   },
   loadingText: {
     fontSize: 12,
@@ -369,20 +471,101 @@ const styles = StyleSheet.create({
     marginTop: 4,
     textAlign: 'center',
   },
-  imageModalOverlay: {
+
+  /* ─── Lightbox Modal ─── */
+  previewModalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    backgroundColor: 'rgba(15, 23, 42, 0.88)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  previewModalContainer: {
+    width: '100%',
+    maxWidth: 520,
+    maxHeight: '90%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#334155',
+    ...Platform.select({
+      web: { boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' },
+      default: { elevation: 12 },
+    }),
+  },
+  previewModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#0F172A',
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+  },
+  previewModalTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  previewModalSub: {
+    fontSize: 11,
+    color: '#94A3B8',
+    marginTop: 2,
+  },
+  previewModalCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  imageCloseBtn: {
-    position: 'absolute',
-    top: 40,
-    right: 20,
-    zIndex: 10,
+  previewImageContainer: {
+    width: '100%',
+    height: 380,
+    backgroundColor: '#020617',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  receiptImage: {
-    width: '90%',
-    height: '80%',
+  previewModalImage: {
+    width: '100%',
+    height: '100%',
+  },
+  previewModalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+    padding: 14,
+    backgroundColor: '#F8FAFC',
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
+  },
+  previewBtnSecondary: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: '#E2E8F0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  previewBtnSecondaryText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  previewBtnPrimary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: '#1E3A8A',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  previewBtnPrimaryText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
 });

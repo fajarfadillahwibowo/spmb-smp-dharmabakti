@@ -72,11 +72,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/verifikasi-seleksi', [Admin\VerifikasiController::class, 'seleksiIndex'])->name('verifikasi.seleksi.index');
     Route::put('/verifikasi-seleksi/{id}', [Admin\VerifikasiController::class, 'seleksiUpdate'])->name('verifikasi.seleksi.update');
     
-    // Verifikasi Pembayaran
+    // Verifikasi Pembayaran & Pengaturan Rekening
     Route::get('/verifikasi-pembayaran', [Admin\PembayaranController::class, 'index'])->name('pembayaran.index');
     Route::put('/verifikasi-pembayaran/{id}', [Admin\PembayaranController::class, 'update'])->name('pembayaran.update');
+    Route::post('/verifikasi-pembayaran/pengaturan', [Admin\PembayaranController::class, 'updatePengaturan'])->name('pembayaran.pengaturan');
     
     // Cetak Laporan
     Route::get('/cetak-laporan', [Admin\LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/cetak-laporan/pdf', [Admin\LaporanController::class, 'generatePdf'])->name('laporan.pdf');
+    Route::get('/cetak-laporan/preview', [Admin\LaporanController::class, 'previewPdf'])->name('laporan.preview');
 });

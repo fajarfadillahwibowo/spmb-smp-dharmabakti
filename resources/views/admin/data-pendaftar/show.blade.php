@@ -64,23 +64,137 @@
         </div>
     </div>
 
-    <!-- Data Detail -->
-    <div class="anim-card bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden lg:col-span-2">
-        <div class="p-6 border-b border-slate-100 flex items-center gap-3">
-            <i class="ph ph-identification-card text-2xl text-primary"></i>
-            <h2 class="text-lg font-bold text-slate-800">Informasi Pribadi & Orang Tua</h2>
-        </div>
-        <div class="p-6">
+    <!-- Data Detail Lengkap 11 Kolom -->
+    <div class="anim-card bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden lg:col-span-2 space-y-6 p-6">
+        <!-- Bagian 1: Biodata Peserta Didik (Kolom 1 - 7 & 11) -->
+        <div>
+            <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100 mb-4">
+                <div class="w-8 h-8 rounded-lg bg-blue-50 text-primary flex items-center justify-center font-bold">
+                    <i class="ph ph-identification-card text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-800">1. Biodata Peserta Didik</h3>
+                    <p class="text-xs text-slate-500">Kolom 1 s/d 7 & Kolom 11 Formulir Resmi SMP Dharma Bakti</p>
+                </div>
+            </div>
+
             <table class="w-full text-sm">
-                <tbody class="divide-y divide-slate-50">
-                    <tr><td class="py-3 text-slate-500 w-1/3">NISN</td><td class="py-3 font-medium text-slate-800">{{ $pendaftaran->calonSiswa->nisn ?? '-' }}</td></tr>
-                    <tr><td class="py-3 text-slate-500">Tempat, Tgl Lahir</td><td class="py-3 font-medium text-slate-800">{{ $pendaftaran->calonSiswa->tempat_lahir }}, {{ $pendaftaran->calonSiswa->tanggal_lahir?->format('d M Y') }}</td></tr>
-                    <tr><td class="py-3 text-slate-500">Jenis Kelamin</td><td class="py-3 font-medium text-slate-800">{{ $pendaftaran->calonSiswa->jenis_kelamin }}</td></tr>
-                    <tr><td class="py-3 text-slate-500">Asal Sekolah</td><td class="py-3 font-medium text-slate-800">{{ $pendaftaran->asal_sekolah }}</td></tr>
-                    <tr><td class="py-3 text-slate-500">Alamat Lengkap</td><td class="py-3 font-medium text-slate-800">{{ $pendaftaran->calonSiswa->alamat }}</td></tr>
-                    <tr><td class="py-3 text-slate-500">Nama Orang Tua / Wali</td><td class="py-3 font-medium text-slate-800">{{ $pendaftaran->calonSiswa->nama_ortu_wali }}</td></tr>
-                    <tr><td class="py-3 text-slate-500">No. HP Orang Tua</td><td class="py-3 font-medium text-slate-800">{{ $pendaftaran->calonSiswa->no_hp_ortu }}</td></tr>
-                    <tr><td class="py-3 text-slate-500">Email Akun</td><td class="py-3 font-medium text-slate-800">{{ $pendaftaran->calonSiswa->user->email }}</td></tr>
+                <tbody class="divide-y divide-slate-100">
+                    <tr>
+                        <td class="py-2.5 text-slate-500 w-1/3">1. Nama Peserta Didik</td>
+                        <td class="py-2.5 font-bold text-slate-900">{{ $pendaftaran->calonSiswa->nama_lengkap }}</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2.5 text-slate-500">2. Tempat, Tgl Lahir</td>
+                        <td class="py-2.5 font-medium text-slate-800">{{ $pendaftaran->calonSiswa->tempat_lahir }}, {{ $pendaftaran->calonSiswa->tanggal_lahir?->format('d F Y') }}</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2.5 text-slate-500">3. No. Kartu Keluarga (KK)</td>
+                        <td class="py-2.5 font-mono font-medium text-slate-800">{{ $pendaftaran->calonSiswa->no_kk ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2.5 text-slate-500">4. NIK Siswa</td>
+                        <td class="py-2.5 font-mono font-medium text-slate-800">{{ $pendaftaran->calonSiswa->nik ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2.5 text-slate-500">5. NISN</td>
+                        <td class="py-2.5 font-mono font-bold text-primary">{{ $pendaftaran->calonSiswa->nisn ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2.5 text-slate-500">Jenis Kelamin</td>
+                        <td class="py-2.5 font-medium text-slate-800">{{ $pendaftaran->calonSiswa->jenis_kelamin }}</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2.5 text-slate-500">6. Agama</td>
+                        <td class="py-2.5 font-medium text-slate-800">{{ $pendaftaran->calonSiswa->agama ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2.5 text-slate-500">7. Alamat Peserta Didik</td>
+                        <td class="py-2.5 font-medium text-slate-800">{{ $pendaftaran->calonSiswa->alamat }}</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2.5 text-slate-500">11. Ukuran Pakaian Seragam</td>
+                        <td class="py-2.5">
+                            <span class="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                Ukuran {{ $pendaftaran->calonSiswa->ukuran_pakaian ?? 'M' }}
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Bagian 2: Data Orang Tua / Wali (Kolom 8 & 10) -->
+        <div class="pt-4 border-t border-slate-100">
+            <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100 mb-4">
+                <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                    <i class="ph ph-users text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-800">2. Data Orang Tua / Wali</h3>
+                    <p class="text-xs text-slate-500">Kolom 8 & Kolom 10 Formulir Resmi</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <!-- Ayah -->
+                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                    <div class="flex items-center gap-2 text-blue-700 font-bold text-xs uppercase mb-2">
+                        <i class="ph ph-user text-sm"></i> Data Ayah Kandung
+                    </div>
+                    <table class="w-full text-xs">
+                        <tr class="border-b border-slate-100"><td class="py-1.5 text-slate-500 w-1/3">Nama</td><td class="py-1.5 font-semibold text-slate-800">{{ $pendaftaran->calonSiswa->nama_ayah ?: ($pendaftaran->calonSiswa->nama_ortu_wali ?: '-') }}</td></tr>
+                        <tr class="border-b border-slate-100"><td class="py-1.5 text-slate-500">Pekerjaan</td><td class="py-1.5 text-slate-800">{{ $pendaftaran->calonSiswa->pekerjaan_ayah ?: '-' }}</td></tr>
+                        <tr><td class="py-1.5 text-slate-500">Alamat</td><td class="py-1.5 text-slate-800">{{ $pendaftaran->calonSiswa->alamat_ayah ?: '-' }}</td></tr>
+                    </table>
+                </div>
+
+                <!-- Ibu -->
+                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                    <div class="flex items-center gap-2 text-pink-700 font-bold text-xs uppercase mb-2">
+                        <i class="ph ph-user text-sm"></i> Data Ibu Kandung
+                    </div>
+                    <table class="w-full text-xs">
+                        <tr class="border-b border-slate-100"><td class="py-1.5 text-slate-500 w-1/3">Nama</td><td class="py-1.5 font-semibold text-slate-800">{{ $pendaftaran->calonSiswa->nama_ibu ?: '-' }}</td></tr>
+                        <tr class="border-b border-slate-100"><td class="py-1.5 text-slate-500">Pekerjaan</td><td class="py-1.5 text-slate-800">{{ $pendaftaran->calonSiswa->pekerjaan_ibu ?: '-' }}</td></tr>
+                        <tr><td class="py-1.5 text-slate-500">Alamat</td><td class="py-1.5 text-slate-800">{{ $pendaftaran->calonSiswa->alamat_ibu ?: '-' }}</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <table class="w-full text-sm">
+                <tbody class="divide-y divide-slate-100">
+                    <tr>
+                        <td class="py-2.5 text-slate-500 w-1/3">10. No. HP / WhatsApp Ortu</td>
+                        <td class="py-2.5 font-bold text-emerald-700">
+                            <i class="ph ph-whatsapp-logo mr-1"></i> {{ $pendaftaran->calonSiswa->no_hp_ortu }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="py-2.5 text-slate-500">Email Akun Pendaftar</td>
+                        <td class="py-2.5 font-medium text-slate-800">{{ $pendaftaran->calonSiswa->user?->email }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Bagian 3: Asal Sekolah (Kolom 9) -->
+        <div class="pt-4 border-t border-slate-100">
+            <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100 mb-3">
+                <div class="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center font-bold">
+                    <i class="ph ph-graduation-cap text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-800">3. Asal Sekolah (Kolom 9)</h3>
+                </div>
+            </div>
+
+            <table class="w-full text-sm">
+                <tbody>
+                    <tr>
+                        <td class="py-2.5 text-slate-500 w-1/3">9. Asal Sekolah (SD/MI)</td>
+                        <td class="py-2.5 font-bold text-slate-900">{{ $pendaftaran->asal_sekolah }}</td>
+                    </tr>
                 </tbody>
             </table>
         </div>

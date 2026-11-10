@@ -20,3 +20,4 @@ yarn-error.log
 /mobile/node_modules
 /mobile/.expo
 /mobile/web-build
+/mobile/dist

@@ -55,12 +55,16 @@ export default function MagicBottomTabBar({ state, descriptors, navigation }) {
   const indicatorSize = numTabs <= 4 ? 54 : 48;
   const iconBaseSize = numTabs <= 4 ? 23 : 21;
 
-  // Lebar dock terukur
-  const [dockWidth, setDockWidth] = useState(0);
+  // Lebar dock terukur (diberi nilai awal agar langsung tampil tanpa menunggu onLayout)
+  const windowWidth = Dimensions.get('window').width || 390;
+  const initialDockWidth = Math.min(windowWidth * 0.94, 480);
+  const [dockWidth, setDockWidth] = useState(initialDockWidth);
   const isInitialized = useRef(false);
 
   // Animasi posisi X indikator bulat
-  const indicatorAnim = useRef(new Animated.Value(0)).current;
+  const initialTabWidth = initialDockWidth / (numTabs || 1);
+  const initialTargetX = state.index * initialTabWidth + (initialTabWidth - indicatorSize) / 2;
+  const indicatorAnim = useRef(new Animated.Value(initialTargetX)).current;
 
   // Animasi per-tab (0 = inactive, 1 = active)
   const tabAnims = useRef(
@@ -281,7 +285,7 @@ export default function MagicBottomTabBar({ state, descriptors, navigation }) {
 
 const styles = StyleSheet.create({
   outerWrapper: {
-    position: 'absolute',
+    position: Platform.OS === 'web' ? 'fixed' : 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
@@ -289,7 +293,8 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     backgroundColor: 'transparent',
     paddingTop: 24, // Ruang atas agar indikator bulat tidak terpotong sistem Android
-    zIndex: 990,
+    zIndex: 9999,
+    width: '100%',
   },
   dock: {
     width: '94%',
@@ -309,6 +314,7 @@ const styles = StyleSheet.create({
     elevation: 16,
     borderWidth: 1.2,
     borderColor: 'rgba(255, 255, 255, 0.12)',
+    ...(Platform.OS === 'web' ? { pointerEvents: 'auto' } : {}),
   },
   indicatorWrapper: {
     position: 'absolute',

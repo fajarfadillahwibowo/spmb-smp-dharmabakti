@@ -18,10 +18,20 @@ class CalonSiswa extends Model
         'nisn',
         'tempat_lahir',
         'tanggal_lahir',
+        'no_kk',
+        'nik',
         'jenis_kelamin',
+        'agama',
         'alamat',
+        'nama_ayah',
+        'pekerjaan_ayah',
+        'alamat_ayah',
+        'nama_ibu',
+        'pekerjaan_ibu',
+        'alamat_ibu',
         'nama_ortu_wali',
         'no_hp_ortu',
+        'ukuran_pakaian',
     ];
 
     protected $casts = [

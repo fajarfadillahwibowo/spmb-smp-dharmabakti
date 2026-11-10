@@ -30,14 +30,16 @@ class DokumenController extends Controller
 
         $dokumen = $pendaftaran->dokumen;
 
+        $baseUrl = $request->getSchemeAndHttpHost() . '/storage/';
+
         // Buat URL lengkap untuk setiap dokumen yang sudah diupload
         $data = [
             'status_pendaftaran' => $pendaftaran->status_pendaftaran,
             'catatan_verifikasi' => $pendaftaran->catatan_verifikasi,
-            'akte_kelahiran' => $dokumen?->akte_kelahiran ? Storage::url($dokumen->akte_kelahiran) : null,
-            'kartu_keluarga' => $dokumen?->kartu_keluarga ? Storage::url($dokumen->kartu_keluarga) : null,
-            'pasfoto'        => $dokumen?->pasfoto ? Storage::url($dokumen->pasfoto) : null,
-            'ijazah'         => $dokumen?->ijazah ? Storage::url($dokumen->ijazah) : null,
+            'akte_kelahiran' => $dokumen?->akte_kelahiran ? $baseUrl . $dokumen->akte_kelahiran : null,
+            'kartu_keluarga' => $dokumen?->kartu_keluarga ? $baseUrl . $dokumen->kartu_keluarga : null,
+            'pasfoto'        => $dokumen?->pasfoto ? $baseUrl . $dokumen->pasfoto : null,
+            'ijazah'         => $dokumen?->ijazah ? $baseUrl . $dokumen->ijazah : null,
             'semua_lengkap'  => $dokumen &&
                 $dokumen->akte_kelahiran &&
                 $dokumen->kartu_keluarga &&
@@ -127,6 +129,50 @@ class DokumenController extends Controller
                 'semua_lengkap'      => $semuaLengkap,
                 'status_pendaftaran' => $pendaftaran->fresh()->status_pendaftaran,
                 'catatan_verifikasi' => $pendaftaran->fresh()->catatan_verifikasi,
+            ],
+        ]);
+    }
+
+    /**
+     * POST /api/siswa/dokumen/ajukan-ulang
+     * Mengajukan ulang permohonan verifikasi setelah berkas diperbaiki.
+     */
+    public function ajukanUlang(Request $request)
+    {
+        $calonSiswa = $request->user()->calonSiswa;
+        $pendaftaran = $calonSiswa?->pendaftaran;
+
+        if (!$pendaftaran) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data pendaftaran tidak ditemukan.',
+            ], 404);
+        }
+
+        $dokumen = $pendaftaran->dokumen;
+        $semuaLengkap = $dokumen &&
+            $dokumen->akte_kelahiran &&
+            $dokumen->kartu_keluarga &&
+            $dokumen->pasfoto &&
+            $dokumen->ijazah;
+
+        if (!$semuaLengkap) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Harap lengkapi seluruh 4 dokumen persyaratan sebelum mengajukan verifikasi ulang.',
+            ], 422);
+        }
+
+        $pendaftaran->update([
+            'status_pendaftaran' => 'menunggu_verifikasi',
+            'catatan_verifikasi' => 'Berkas perbaikan telah diajukan ulang oleh calon siswa. Menunggu verifikasi ulang panitia.',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Berkas perbaikan berhasil diajukan ulang. Status Anda kini Menunggu Verifikasi.',
+            'data'    => [
+                'status_pendaftaran' => 'menunggu_verifikasi',
             ],
         ]);
     }

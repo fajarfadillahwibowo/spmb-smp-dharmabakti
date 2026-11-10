@@ -5,39 +5,76 @@
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1.00001, viewport-fit=cover" />
     <title>SPMB SMP Dharma Bakti Mobile</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+      :root {
+        --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        --font-heading: 'Outfit', sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
       html, body {
         height: 100%;
         width: 100%;
         margin: 0;
         padding: 0;
-        background-color: #0F172A;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: #0B0F19;
+        font-family: var(--font-main);
+        overflow-x: hidden;
+        -webkit-tap-highlight-color: transparent;
       }
       #root {
         display: flex;
         flex-direction: column;
         height: 100%;
         width: 100%;
-        min-height: 100vh;
+        min-height: 100%;
+        position: relative;
+        background: #0B0F19;
       }
-      /* Centering container for desktop view to look like a clean mobile preview */
+      /* Custom smooth scrollbar */
+      ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 999px;
+      }
+      /* 3D Tactile button physical press sensation */
+      [role="button"]:active, button:active {
+        transform: translateY(2px) scale(0.985);
+        transition: transform 0.08s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      /* Centering container for desktop preview to look like modern iPhone / Android flagship */
       @media (min-width: 600px) {
         body {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+          background: radial-gradient(circle at 50% 20%, #1E293B 0%, #0F172A 70%, #020617 100%);
         }
         #root {
           max-width: 440px;
           height: 92vh;
-          min-height: 700px;
-          max-height: 900px;
-          border-radius: 36px;
+          min-height: 720px;
+          max-height: 920px;
+          border-radius: 40px;
           overflow: hidden;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 10px #1E293B;
-          border: 4px solid #334155;
+          box-shadow: 
+            0 30px 60px -15px rgba(0, 0, 0, 0.9),
+            0 0 0 10px #1E293B,
+            0 0 0 12px #334155,
+            0 0 40px rgba(56, 189, 248, 0.15);
+          border: 3px solid rgba(255, 255, 255, 0.08);
         }
       }
     </style>

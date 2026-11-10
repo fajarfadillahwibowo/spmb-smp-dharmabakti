@@ -44,6 +44,12 @@ Route::prefix('auth')->name('api.auth.')->group(function () {
     Route::post('/resend-reset-otp', [AuthController::class, 'resendResetOtp'])->name('resend-reset-otp');
 });
 
+// Endpoint unduh file rekapitulasi Excel admin
+Route::get('/admin/download-rekap-excel', [Admin\LaporanController::class, 'exportExcel'])->name('admin.download-excel');
+Route::get('/laporan/download-pdf', [Admin\LaporanController::class, 'exportPdf'])->name('api.laporan.download-pdf');
+Route::get('/laporan/preview-pdf', [Admin\LaporanController::class, 'previewPdf'])->name('api.laporan.preview-pdf');
+Route::get('/admin/download-file', [Admin\LaporanController::class, 'downloadFile'])->name('api.admin.download-file');
+
 // =========================================================================
 // ENDPOINT YANG MEMBUTUHKAN AUTENTIKASI TOKEN (auth:sanctum)
 // =========================================================================
@@ -55,6 +61,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout'])->name('api.auth.logout');
     Route::post('/auth/profile', [AuthController::class, 'updateProfile'])->name('api.auth.profile.update');
     Route::delete('/auth/profile/photo', [AuthController::class, 'deleteProfilePhoto'])->name('api.auth.profile.photo.delete');
+
+    // Info rekening pembayaran sekolah dinamis (bisa diakses oleh seluruh pengguna)
+    Route::get('/pengaturan-pembayaran', [Admin\PembayaranController::class, 'getPengaturan'])->name('api.pengaturan-pembayaran');
 
     // =====================================================================
     // PORTAL SISWA - Hanya bisa diakses oleh user dengan role 'siswa'
@@ -71,11 +80,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // GET  /api/siswa/dokumen  - Cek status dokumen yang sudah diupload
         // POST /api/siswa/dokumen  - Upload dokumen persyaratan (multipart/form-data)
+        // POST /api/siswa/dokumen/ajukan-ulang - Ajukan ulang verifikasi setelah revisi
         Route::get('/dokumen', [Siswa\DokumenController::class, 'show'])->name('dokumen.show');
         Route::post('/dokumen', [Siswa\DokumenController::class, 'upload'])->name('dokumen.upload');
+        Route::post('/dokumen/ajukan-ulang', [Siswa\DokumenController::class, 'ajukanUlang'])->name('dokumen.ajukan-ulang');
 
         // GET  /api/siswa/seleksi  - Data jadwal dan status seleksi
+        // GET  /api/siswa/seleksi/cetak-kartu - URL unduh kartu ujian PDF
         Route::get('/seleksi', [Siswa\SeleksiController::class, 'index'])->name('seleksi.index');
+        Route::get('/seleksi/cetak-kartu', [Siswa\SeleksiController::class, 'getUrl'])->name('seleksi.cetak-kartu');
 
         // GET  /api/siswa/pengumuman - Hasil pengumuman kelulusan
         Route::get('/pengumuman', [Siswa\PengumumanController::class, 'index'])->name('pengumuman.index');
@@ -87,6 +100,20 @@ Route::middleware('auth:sanctum')->group(function () {
         // POST /api/siswa/pembayaran  - Upload bukti transfer pembayaran
         Route::get('/pembayaran', [Siswa\PembayaranController::class, 'show'])->name('pembayaran.show');
         Route::post('/pembayaran', [Siswa\PembayaranController::class, 'upload'])->name('pembayaran.upload');
+
+        // GET  /api/siswa/notifikasi          - Ambil notifikasi dari admin (broadcast + personal)
+        // POST /api/siswa/notifikasi/{id}/read - Tandai satu notifikasi sudah dibaca
+        // POST /api/siswa/notifikasi/read-all  - Tandai semua notifikasi sudah dibaca
+        Route::get('/notifikasi', [Siswa\NotifikasiController::class, 'index'])->name('notifikasi.index');
+        Route::post('/notifikasi/{id}/read', [Siswa\NotifikasiController::class, 'markRead'])->name('notifikasi.read');
+        Route::post('/notifikasi/read-all', [Siswa\NotifikasiController::class, 'markAllRead'])->name('notifikasi.read-all');
+
+        // GET  /api/siswa/chat              - Riwayat chat langsung dengan admin
+        // POST /api/siswa/chat              - Kirim pesan ke admin
+        // GET  /api/siswa/chat/unread-count - Jumlah pesan belum dibaca
+        Route::get('/chat', [Siswa\ChatController::class, 'index'])->name('chat.index');
+        Route::post('/chat', [Siswa\ChatController::class, 'send'])->name('chat.send');
+        Route::get('/chat/unread-count', [Siswa\ChatController::class, 'unreadCount'])->name('chat.unread');
     });
 
     // =====================================================================
@@ -117,8 +144,30 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/pembayaran', [Admin\PembayaranController::class, 'index'])->name('pembayaran.index');
         Route::put('/pembayaran/{id}', [Admin\PembayaranController::class, 'update'])->name('pembayaran.update');
 
+        // GET  /api/admin/pengaturan-pembayaran - Ambil setting rekening bank & biaya
+        // PUT  /api/admin/pengaturan-pembayaran - Simpan setting rekening bank & biaya
+        Route::get('/pengaturan-pembayaran', [Admin\PembayaranController::class, 'getPengaturan'])->name('pembayaran.pengaturan.get');
+        Route::put('/pengaturan-pembayaran', [Admin\PembayaranController::class, 'updatePengaturan'])->name('pembayaran.pengaturan.update');
+
         // GET  /api/admin/laporan - Data rekapitulasi laporan lengkap
         Route::get('/laporan', [Admin\LaporanController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan/export-excel', [Admin\LaporanController::class, 'exportExcel'])->name('laporan.export');
+
+        // GET    /api/admin/notifikasi       - Riwayat semua notifikasi yang terkirim
+        // POST   /api/admin/notifikasi       - Kirim notifikasi baru (broadcast/personal)
+        // DELETE /api/admin/notifikasi/{id}  - Hapus notifikasi
+        Route::get('/notifikasi', [Admin\NotifikasiController::class, 'index'])->name('notifikasi.index');
+        Route::post('/notifikasi', [Admin\NotifikasiController::class, 'store'])->name('notifikasi.store');
+        Route::delete('/notifikasi/{id}', [Admin\NotifikasiController::class, 'destroy'])->name('notifikasi.destroy');
+
+        // GET  /api/admin/chat/conversations  - Daftar percakapan dengan calon siswa
+        // GET  /api/admin/chat/unread-count   - Total pesan belum dibaca untuk admin
+        // GET  /api/admin/chat/{siswa_id}     - Riwayat percakapan dengan 1 siswa
+        // POST /api/admin/chat/{siswa_id}     - Balas pesan ke 1 siswa
+        Route::get('/chat/conversations', [Admin\ChatController::class, 'conversations'])->name('chat.conversations');
+        Route::get('/chat/unread-count', [Admin\ChatController::class, 'unreadCount'])->name('chat.unread');
+        Route::get('/chat/{siswa_id}', [Admin\ChatController::class, 'messages'])->name('chat.messages');
+        Route::post('/chat/{siswa_id}', [Admin\ChatController::class, 'send'])->name('chat.send');
     });
 
     // =====================================================================
@@ -136,5 +185,18 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // GET  /api/kepala-sekolah/keuangan - Monitoring arus transaksi & uang masuk
         Route::get('/keuangan', [KepalaSekolah\KeuanganController::class, 'index'])->name('keuangan.index');
+
+        // GET  /api/kepala-sekolah/laporan - Laporan rekapan akhir calon siswa (identik dengan admin)
+        Route::get('/laporan', [Admin\LaporanController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan/download-pdf', [Admin\LaporanController::class, 'exportPdf'])->name('laporan.download-pdf');
+        Route::get('/laporan/preview-pdf', [Admin\LaporanController::class, 'previewPdf'])->name('laporan.preview-pdf');
     });
 });
+
+// =========================================================================
+// PUBLIC / TOKENIZED PDF DOWNLOAD ENDPOINTS
+// Dapat diakses langsung oleh browser ponsel (mendukung ?token=... / header)
+// =========================================================================
+Route::get('/siswa/seleksi/download-kartu-pdf', [Siswa\SeleksiController::class, 'downloadPdf'])->name('api.siswa.seleksi.download-pdf');
+Route::get('/siswa/download-bukti-pdf', [Siswa\CetakBuktiController::class, 'downloadPdf'])->name('api.siswa.download-bukti-pdf');
+

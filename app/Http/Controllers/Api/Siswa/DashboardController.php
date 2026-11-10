@@ -61,6 +61,7 @@ class DashboardController extends Controller
             // Status & jadwal seleksi
             if ($pendaftaran->seleksi) {
                 $summary['status_seleksi']  = $pendaftaran->seleksi->status_seleksi;
+                $summary['nilai_seleksi']   = $pendaftaran->seleksi->nilai_seleksi;
                 $summary['tanggal_seleksi'] = $pendaftaran->seleksi->tanggal_seleksi?->translatedFormat('d M Y');
                 $summary['waktu_seleksi']   = $pendaftaran->seleksi->waktu_seleksi;
                 $summary['tempat_seleksi']  = $pendaftaran->seleksi->tempat_seleksi;
@@ -68,8 +69,14 @@ class DashboardController extends Controller
             }
 
             // Hasil pengumuman
-            if ($pendaftaran->seleksi && $pendaftaran->seleksi->pengumuman) {
-                $summary['hasil_pengumuman'] = $pendaftaran->seleksi->pengumuman->hasil_pendaftaran;
+            if ($pendaftaran->seleksi) {
+                if ($pendaftaran->seleksi->pengumuman) {
+                    $summary['hasil_pengumuman'] = $pendaftaran->seleksi->pengumuman->hasil_pendaftaran;
+                } elseif ($pendaftaran->seleksi->status_seleksi === 'diterima' || ($pendaftaran->seleksi->nilai_seleksi !== null && $pendaftaran->seleksi->status_seleksi !== 'tidak_diterima')) {
+                    $summary['hasil_pengumuman'] = 'Diterima';
+                } elseif ($pendaftaran->seleksi->status_seleksi === 'tidak_diterima') {
+                    $summary['hasil_pengumuman'] = 'Tidak Diterima';
+                }
             }
 
             // Status pembayaran

@@ -21,6 +21,18 @@ class SeleksiController extends Controller
     }
 
     /**
+     * Halaman Khusus Kartu Ujian Seleksi (3D Modern View)
+     */
+    public function kartuUjian()
+    {
+        $calonSiswa  = Auth::user()->calonSiswa;
+        $pendaftaran = $calonSiswa ? $calonSiswa->pendaftaran : null;
+        $seleksi     = $pendaftaran ? $pendaftaran->seleksi : null;
+
+        return view('siswa.kartu-ujian', compact('calonSiswa', 'pendaftaran', 'seleksi'));
+    }
+
+    /**
      * Generate dan unduh PDF kartu ujian seleksi.
      */
     public function cetakKartu()
@@ -29,8 +41,8 @@ class SeleksiController extends Controller
         $pendaftaran = $calonSiswa ? $calonSiswa->pendaftaran : null;
         $seleksi = $pendaftaran ? $pendaftaran->seleksi : null;
 
-        if (!$pendaftaran || $pendaftaran->status_pendaftaran !== 'terverifikasi' || !$seleksi || !$seleksi->tanggal_seleksi) {
-            return redirect()->route('siswa.seleksi.index')->with('error', 'Anda belum dapat mencetak kartu ujian seleksi. Pastikan berkas Anda telah diverifikasi.');
+        if (!$pendaftaran) {
+            return redirect()->route('siswa.dashboard')->with('error', 'Data pendaftaran belum ditemukan. Harap isi formulir terlebih dahulu.');
         }
 
         $pdf = Pdf::loadView('siswa.cetak-kartu', compact('calonSiswa', 'pendaftaran', 'seleksi'));

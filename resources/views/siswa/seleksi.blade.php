@@ -20,11 +20,9 @@
                     <h2 class="text-xl font-bold text-slate-800">Ujian Seleksi Offline</h2>
                     <p class="text-sm text-slate-500 mt-1">Ujian masuk SPMB SMP Dharma Bakti</p>
                 </div>
-                @if($seleksi->tanggal_seleksi)
-                    <a href="{{ route('siswa.seleksi.cetak-kartu') }}" class="inline-flex items-center gap-2 bg-primary hover:bg-primaryHover text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm whitespace-nowrap">
-                        <i class="ph ph-printer text-lg"></i> Cetak Kartu Ujian (PDF)
-                    </a>
-                @endif
+                <a href="{{ route('siswa.seleksi.cetak-kartu') }}" target="_blank" class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-md whitespace-nowrap border-b-2 border-blue-800">
+                    <i class="ph ph-printer text-lg text-amber-300"></i> Cetak Kartu Ujian (PDF)
+                </a>
             </div>
 
             <div class="p-6 md:p-8">

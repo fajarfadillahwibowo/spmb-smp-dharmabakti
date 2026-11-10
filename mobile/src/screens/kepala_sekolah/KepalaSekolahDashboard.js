@@ -86,7 +86,7 @@ export default function KepalaSekolahDashboard({ navigation }) {
         <Text style={styles.bannerTag}>PANEL PENGAWASAN SPMB</Text>
         <Text style={styles.bannerTitle}>SMP DHARMA BAKTI</Text>
         <Text style={styles.bannerDesc}>
-          Tahun Ajaran {data?.tahun_ajaran || '2025/2026'} • Monitoring Real-Time
+          Tahun Ajaran {data?.tahun_ajaran || '2026/2027'} • Monitoring Real-Time
         </Text>
       </View>
 
@@ -97,16 +97,41 @@ export default function KepalaSekolahDashboard({ navigation }) {
           onPress={() => navigation.navigate('TabKepsekPendaftar')}
         >
           <Ionicons name="people" size={16} color="#1E3A8A" />
-          <Text style={styles.pillText}>Monitoring Siswa</Text>
+          <Text style={styles.pillText}>Data Siswa</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.pillButton, { backgroundColor: '#ECFDF5', borderColor: '#A7F3D0' }]}
           onPress={() => navigation.navigate('TabKepsekKeuangan')}
         >
           <Ionicons name="cash" size={16} color="#059669" />
-          <Text style={[styles.pillText, { color: '#059669' }]}>Arus Keuangan</Text>
+          <Text style={[styles.pillText, { color: '#059669' }]}>Keuangan</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.pillButton, { backgroundColor: '#F0FDF4', borderColor: '#86EFAC' }]}
+          onPress={() => navigation.navigate('TabKepsekLaporan')}
+        >
+          <Ionicons name="document-text" size={16} color="#15803D" />
+          <Text style={[styles.pillText, { color: '#15803D' }]}>Laporan PDF</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Laporan Rekapitulasi Akhir Banner */}
+      <TouchableOpacity
+        style={styles.laporanBanner}
+        onPress={() => navigation.navigate('TabKepsekLaporan')}
+        activeOpacity={0.88}
+      >
+        <View style={styles.laporanBannerIcon}>
+          <Ionicons name="newspaper" size={24} color="#15803D" />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.laporanBannerTitle}>Laporan Rekapitulasi Akhir (PDF)</Text>
+          <Text style={styles.laporanBannerSub}>
+            Pratinjau lembar data diri calon siswa baru & unduh laporan resmi ber-kop sekolah
+          </Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color="#15803D" />
+      </TouchableOpacity>
 
       {/* Grid Metrik Utama */}
       <View style={styles.metricGrid}>
@@ -290,5 +315,41 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '700',
     fontSize: 14,
+  },
+  laporanBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1.5,
+    borderColor: '#86EFAC',
+    borderRadius: 14,
+    marginHorizontal: 16,
+    marginTop: 10,
+    marginBottom: 6,
+    padding: 14,
+    gap: 12,
+    shadowColor: '#15803D',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  laporanBannerIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    backgroundColor: '#DCFCE7',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  laporanBannerTitle: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#15803D',
+  },
+  laporanBannerSub: {
+    fontSize: 11,
+    color: '#166534',
+    marginTop: 2,
   },
 });
